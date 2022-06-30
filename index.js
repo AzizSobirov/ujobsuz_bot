@@ -6,15 +6,26 @@ require("dotenv").config();
 const my_const = require("./const");
 // Инициализация бота с помощью Telegraf
 const bot = new Telegraf("5537312113:AAHBC0M73um0Ia9bsQYtsXOIUFVxl-4edl0");
+// import ref and set from firebase in node js
+const fb = require("firebase/database");
+const db = require("./db");
 
 // Обработка команды /start
-bot.start((ctx) =>
-  ctx.reply(
-    `Привет ${
-      ctx.message.from.first_name ? ctx.message.from.first_name : "незнакомец"
-    }!`
-  )
-);
+bot.start((ctx) => {
+  fb.set(fb.ref(db, "users/" + ctx.from.id), {
+    id: ctx.from.id,
+    first_name: ctx.from.first_name,
+    username: ctx.from.username,
+  });
+
+  ctx.replyWithHTML(
+    `Assalomu alaykum ${
+      ctx.message.from.first_name
+        ? "<b>" + ctx.message.from.first_name + "</b>"
+        : "незнакомец"
+    }`
+  );
+});
 // Обработка команды /help
 bot.help((ctx) => ctx.reply(my_const.commands));
 // Обработка команды /course
@@ -34,6 +45,19 @@ bot.command("course", async (ctx) => {
     console.error(e);
   }
 });
+// users
+bot.command("users", async (ctx) => {
+  try {
+    let users = [];
+    fb.onChildAdded(fb.ref(db, "users"), (snapshot) => {
+      users.push(snapshot.val());
+    });
+    await ctx.replyWithHTML("<b>Users:</b>" + users.length);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 /**
  * Функция для отправки сообщения ботом
  * @param {String} id_btn Идентификатор кнопки для обработки
