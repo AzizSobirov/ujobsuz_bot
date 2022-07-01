@@ -1,12 +1,16 @@
-const { Telegraf, Markup } = require("telegraf");
+const { Telegraf, Markup, Composer, Scenes, session } = require("telegraf");
 require("dotenv").config();
 const my_const = require("./const");
 const bot = new Telegraf("5537312113:AAHBC0M73um0Ia9bsQYtsXOIUFVxl-4edl0");
 const { Keyboard, Key } = require("telegram-keyboard");
 const fb = require("firebase/database");
 const db = require("./db");
-
+const menuScene = require("./register");
 // ***************? //
+
+const stage = new Scenes.Stage([menuScene]);
+bot.use(session());
+bot.use(stage.middleware());
 
 //! Обработка команды /start
 bot.start((ctx) => {
@@ -24,50 +28,67 @@ bot.start((ctx) => {
     } \n 
     Siz <a href='https://ujob.ml'>Upgrade Academy</a> Dasturlash o'quv markazining rasmiy botiga tashrif buyurdingiz.
     O'quv markazimizda quyidagi dasturlash kurslariga yozilishingiz mumkin!`,
-    Keyboard.make([
-      [
-        {
-          text: "📚 Kurslar",
-          callback_data: "courses",
-        },
-        {
-          text: "Biz haqimizda",
-          callback_data: "about",
-        },
-      ],
-    ]).reply()
+    my_const.keyboard
   );
-
-  // ctx.reply("Simple built-in keyboard", keyboard.reply());
-  // ctx.reply("Simple inline keyboard", keyboard.inline());
-
-  // keyboar
 });
 
+// * Обработка Kurslar
+bot.hears("📚 Kurslar", (ctx) => {
+  ctx.reply("Kurslar", my_const.courses);
+});
+
+// * Обработка Bosh sahifa
+bot.hears("Bosh sahifa", (ctx) => {
+  ctx.reply("Bosh sahifa", my_const.keyboard);
+});
+
+bot.hears("🌐 WEB DASTURLASH", (ctx) => {
+  ctx.scene.enter("web");
+  // ctx.reply(
+  //   `{ 1+1 =  FrontEnd + BackEnd}
+  //   Biznesga yo'naltirilgan web dasturlash.
+  //   ✔️   HTML 5
+  //   ✔️   CSS
+  //   ✔️   JS
+  //   ✔️  BOOTSTAP
+  //   ✔️  jQuery
+  //   ✔️  PHP&MySQL
+  //   ✔️  CMS (Wordpress, Joomla, Drupal, OpenCart)
+  //   ✔️  Responsive Template
+  //   ✔️  Internet Magazin yaratish
+  //   ✅ {SERTIFIKAT} beriladi!
+
+  //   (Darslar: 4 oy davomida haftaning juft yoki toq kunlarida bo'ladi. Har bir dars 2 soatdan.)
+  //   💸 KURS NARXI - ( 1 400 000 so'm ).`,
+  //   Keyboard.make([Key.callback("Kursga yozilish", "web")]).inline()
+  // );
+});
+
+// ? Callback кнопки
 bot.on("callback_query", async (ctx) => {
-  const { data } = ctx.callbackQuery;
-  console.log(data);
-  if (data === "courses") {
-    ctx.replyWithHTML(
-      `<b>📚 Kurslar</b>
-      <i>
-      <a href='https://ujob.ml/courses/'>Kurslar</a>
-      </i>`,
-      Keyboard.make([
-        [
-          {
-            text: "📚 Kurslar",
-            callback_data: "courses",
-          },
-          {
-            text: "Biz haqimizda",
-            callback_data: "about",
-          },
-        ],
-      ]).reply()
-    );
+  try {
+    const { data } = ctx.callbackQuery;
+    if (data === "web") {
+      ctx.scene.enter("web");
+    }
+  } catch (e) {
+    console.error(e);
   }
 });
+
+// await ctx.answerCbQuery("Kurslar");
+// await ctx.editMessageText(
+//   "Kurslar",
+//   Keyboard.make([
+//     Key.callback("📚 Kurslar", "action1"),
+//     Key.callback("Js", "action2"),
+//   ]).inline()
+// );
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 // * Обработка команды Kurslar
 // // bot.hears("📚 Kurslar", (ctx) => {
@@ -89,26 +110,6 @@ bot.on("callback_query", async (ctx) => {
 //     ]).reply()
 //   );
 // // });
-
-// * Обработка команды Bosh sahifa
-bot.hears("Bosh sahifa", (ctx) => {
-  bot.telegram.sendMessage(
-    ctx.chat.id,
-    '<a href="https://ujob.ml">Upgrade Academy</a>',
-    Keyboard.make([
-      [
-        {
-          text: "📚 Kurslar",
-          callback_data: "courses",
-        },
-        {
-          text: "Biz haqimizda",
-          callback_data: "about",
-        },
-      ],
-    ]).reply()
-  );
-});
 
 //! Обработка команды /help
 bot.help((ctx) => ctx.reply(my_const.commands));
