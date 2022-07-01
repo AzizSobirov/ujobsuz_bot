@@ -43,36 +43,58 @@ bot.hears("Bosh sahifa", (ctx) => {
 });
 
 bot.hears("🌐 WEB DASTURLASH", (ctx) => {
-  ctx.scene.enter("web");
-  // ctx.reply(
-  //   `{ 1+1 =  FrontEnd + BackEnd}
-  //   Biznesga yo'naltirilgan web dasturlash.
-  //   ✔️   HTML 5
-  //   ✔️   CSS
-  //   ✔️   JS
-  //   ✔️  BOOTSTAP
-  //   ✔️  jQuery
-  //   ✔️  PHP&MySQL
-  //   ✔️  CMS (Wordpress, Joomla, Drupal, OpenCart)
-  //   ✔️  Responsive Template
-  //   ✔️  Internet Magazin yaratish
-  //   ✅ {SERTIFIKAT} beriladi!
+  ctx.reply(
+    `{ 1+1 =  FrontEnd + BackEnd}
+    Biznesga yo'naltirilgan web dasturlash.
+    ✔️   HTML 5
+    ✔️   CSS
+    ✔️   JS
+    ✔️  BOOTSTAP
+    ✔️  jQuery
+    ✔️  PHP&MySQL
+    ✔️  CMS (Wordpress, Joomla, Drupal, OpenCart)
+    ✔️  Responsive Template
+    ✔️  Internet Magazin yaratish
+    ✅ {SERTIFIKAT} beriladi!
 
-  //   (Darslar: 4 oy davomida haftaning juft yoki toq kunlarida bo'ladi. Har bir dars 2 soatdan.)
-  //   💸 KURS NARXI - ( 1 400 000 so'm ).`,
-  //   Keyboard.make([Key.callback("Kursga yozilish", "web")]).inline()
-  // );
+    (Darslar: 4 oy davomida haftaning juft yoki toq kunlarida bo'ladi. Har bir dars 2 soatdan.)
+    💸 KURS NARXI - ( 1 400 000 so'm ).`,
+    Keyboard.make([Key.callback("🌐 Kursga yozilish")]).reply()
+  );
 });
 
+bot.hears("🌐 Kursga yozilish", (ctx) => {
+  ctx.state.course = "🌐 WEB DASTURLASH";
+  ctx.scene.enter("web");
+});
+
+// bot.hears("Bekor qilish", (ctx) => {
+//   ctx.reply('Bekor qilindi', my_const.keyboard);
+//   ctx.scene.leave();
+// });
+
 // ? Callback кнопки
+
+// const startNewReview = async (ctx) => {
+//   try {
+//     await ctx.scene.enter("web");
+//   } catch (e) {
+//     console.log(e);
+//   }
+//   // ctx.scene.session.user_id = data[1];
+// };
+
 bot.on("callback_query", async (ctx) => {
-  try {
-    const { data } = ctx.callbackQuery;
-    if (data === "web") {
-      ctx.scene.enter("web");
-    }
-  } catch (e) {
-    console.error(e);
+  const { data } = ctx.callbackQuery;
+  if (data == "web") {
+    await ctx.reply('Iltimos "Kursga yozilish" tugmasini bosing!');
+    await ctx.scene.enter("web");
+    // return await startNewReview(ctx);
+    // try {
+    //   ctx.scene.enter("web");
+    // } catch (e) {
+    //   console.log(e);
+    // }
   }
 });
 

@@ -1,15 +1,19 @@
 const { Composer, Scenes } = require("telegraf");
+const { Keyboard, Key } = require("telegram-keyboard");
 
 const getName = new Composer();
-getName.on("text", async (ctx) => {
+getName.on("text", (ctx) => {
   try {
     ctx.wizard.state.data = {};
     ctx.wizard.state.data.id = ctx.from.id;
     ctx.wizard.state.data.first_name = ctx.from.first_name;
     ctx.wizard.state.data.last_name = ctx.from.last_name;
     ctx.wizard.state.data.username = ctx.from.username;
-    ctx.wizard.state.data.course = ctx.message.text;
-    await ctx.reply("Ismingizni kiriting");
+    ctx.wizard.state.data.course = ctx.state.course;
+    ctx.reply(
+      "Ismingizni kiriting",
+      Keyboard.make([Key.callback("Bekor qilish")]).reply()
+    );
     return ctx.wizard.next();
   } catch (e) {
     console.log(e);
@@ -70,18 +74,21 @@ finished.on("text", async (ctx) => {
     user.number = ctx.message.text;
 
     ctx.reply(
-      `Ism: ${user.first_name}
-    Familiya: ${user.last_name}   
-    Ism: ${user.name}
+      `Ism: ${user.name}
     Yoshingiz: ${user.old}
     Telefon raqamingiz: ${user.number}
     Kurs: ${user.course}`
     );
+    // Familiya: ${user.last_name}
+    // Ism: ${user.first_name}
     return ctx.scene.leave();
   } catch (e) {
     console.log(e);
   }
 });
+
+
+
 
 const menuScene = new Scenes.WizardScene(
   "web",
