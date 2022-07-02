@@ -11,7 +11,7 @@ const commands = `
 // keyboards
 const keyboard = Keyboard.make([
   Key.callback("📚 Kurslar", "action1"),
-//   Key.callback("Button 2", "action2"),
+  //   Key.callback("Button 2", "action2"),
   //     [
   //     {
   //       text: "📚 Kurslar",
@@ -23,6 +23,22 @@ const keyboard = Keyboard.make([
   //     },
   //   ],
 ]).reply();
+
+// const phone = {
+//   reply_markup: {
+//     one_time_keyboard: true,
+//     inline_keyboard: [
+//       [
+//         {
+//           text: "My phone number",
+//           request_contact: true,
+//           one_time_keyboard: true,
+//           callback_data: "contact",
+//         },
+//       ],
+//     ],
+//   },
+// };
 
 // courses
 const courses = Keyboard.make([

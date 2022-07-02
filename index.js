@@ -42,7 +42,10 @@ bot.hears("Bosh sahifa", (ctx) => {
   ctx.reply("Bosh sahifa", my_const.keyboard);
 });
 
+let course = "";
+
 bot.hears("🌐 WEB DASTURLASH", (ctx) => {
+  course = "Web dasturlash";
   ctx.reply(
     `{ 1+1 =  FrontEnd + BackEnd}
     Biznesga yo'naltirilgan web dasturlash.
@@ -59,19 +62,34 @@ bot.hears("🌐 WEB DASTURLASH", (ctx) => {
 
     (Darslar: 4 oy davomida haftaning juft yoki toq kunlarida bo'ladi. Har bir dars 2 soatdan.)
     💸 KURS NARXI - ( 1 400 000 so'm ).`,
-    Keyboard.make([Key.callback("🌐 Kursga yozilish")]).reply()
+    Keyboard.make([Key.callback("Kursga yozilish")]).reply()
   );
 });
 
-bot.hears("🌐 Kursga yozilish", (ctx) => {
-  ctx.state.course = "🌐 WEB DASTURLASH";
-  ctx.scene.enter("web");
+bot.hears("📊 BUXGALTERIYA", (ctx) => {
+  course = "Buxgalteriya";
+  ctx.reply(
+    `"Buxgalteriya noldan balansgacha" kursi haqida batafsil ma'lumotlar
+
+➡️ https://bit.ly/3t0Vvc1F
+    
+👨🏻‍💻 Kurs mentori: Umarbek Jabborov
+    
+@upgradeacademy_uz`,
+    Keyboard.make([Key.callback("Kursga yozilish")]).reply()
+  );
 });
 
-// bot.hears("Bekor qilish", (ctx) => {
-//   ctx.reply('Bekor qilindi', my_const.keyboard);
-//   ctx.scene.leave();
-// });
+bot.hears("Kursga yozilish", (ctx) => {
+  ctx.state.course = course;
+  ctx.scene.enter("register");
+});
+
+bot.hears("Bekor qilish", (ctx) => {
+  console.log(ctx);
+  ctx.reply("Bekor qilindi", my_const.keyboard);
+  return ctx.scene.leave("web");
+});
 
 // ? Callback кнопки
 
