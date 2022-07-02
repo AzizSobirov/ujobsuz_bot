@@ -13,7 +13,10 @@ getName.on("text", (ctx) => {
     ctx.wizard.state.data.last_name = ctx.from.last_name;
     ctx.wizard.state.data.username = ctx.from.username;
     ctx.wizard.state.data.course = ctx.state.course;
-    ctx.reply("Ismingizni kiriting");
+    ctx.reply(
+      "Ismingizni kiriting",
+      Keyboard.make(["🚫 Bekor qilish"]).reply()
+    );
     return ctx.wizard.next();
   } catch (e) {
     console.log(e);
@@ -25,6 +28,8 @@ getOld.on("text", async (ctx) => {
   try {
     if (ctx.message.text.length > 30) {
       ctx.reply("Ismingizni to'g'ri kiriting");
+    } else if (ctx.message.text == "🚫 Bekor qilish") {
+      cancel(ctx);
     } else {
       ctx.wizard.state.data.name = ctx.message.text;
       await ctx.reply("Yoshingizni kiriting");
@@ -40,6 +45,8 @@ getNumber.on("text", async (ctx) => {
   try {
     if (!Number(ctx.message.text)) {
       ctx.reply("Yoshinigzni to'g'ri kiriting");
+    } else if (ctx.message.text == "🚫 Bekor qilish") {
+      cancel(ctx);
     } else {
       ctx.wizard.state.data.old = ctx.message.text;
       await ctx.reply("Telefon raqamingizni kiriting");
@@ -50,8 +57,8 @@ getNumber.on("text", async (ctx) => {
   }
 });
 
-const finished = new Composer();
-finished.on("text", async (ctx) => {
+const getLocation = new Composer();
+getLocation.on("text", async (ctx) => {
   try {
     let number = ctx.message.text;
     if (number.includes("+") || number.includes("-") || number.includes(" ")) {
@@ -63,18 +70,38 @@ finished.on("text", async (ctx) => {
       number.length >= 13
     ) {
       ctx.reply("Raqamingizni to'g'ri kiriting");
+    } else if (ctx.message.text == "🚫 Bekor qilish") {
+      cancel(ctx);
+    } else {
+      ctx.wizard.state.data.number = ctx.message.text;
+      await ctx.reply("Manzilni kiriting");
+      return ctx.wizard.next();
+    }
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+const finished = new Composer();
+finished.on("text", async (ctx) => {
+  try {
+    if (Number(ctx.message.text)) {
+      ctx.reply("Manzilni to'g'ri kiriting");
+    } else if (ctx.message.text == "🚫 Bekor qilish") {
+      cancel(ctx);
     } else {
       let user = ctx.wizard.state.data;
-      user.number = ctx.message.text;
+      user.location = ctx.message.text;
 
       ctx.replyWithHTML(
         `<b>${user.course}</b> kursi uchun so'rov ma'lumotlari: \n
 <b>Ism:</b> ${user.name}
 <b>Yoshingiz:</b> ${user.old}
-<b>Telefon raqamingiz:</b> ${user.number}`,
+<b>Telefon raqamingiz:</b> ${user.number}
+<b>Manzil:</b> ${user.location}`,
         Keyboard.make([
-          Key.callback("Tasdiqlash", "confirm"),
-          Key.callback("Bekor qilish", "cancel"),
+          Key.callback("✅ Tasdiqlash", "confirm"),
+          Key.callback("🚫 Bekor qilish", "cancel"),
         ]).inline()
       );
       return ctx.wizard.next();
@@ -87,16 +114,20 @@ finished.on("text", async (ctx) => {
 const confirm = new Composer();
 confirm.action("confirm", (ctx) => {
   try {
+    let time = new Date().toString().slice(0, 25);
     let user = ctx.wizard.state.data;
-    fb.set(fb.ref(db, "registered/" + ctx.from.id), {
+    fb.set(fb.ref(db, `registered/${time.replace(/[':','+'' ']/g, "")}`), {
       id: user.id,
+      key: time.replace(/[':','+'' ']/g, ""),
       name: user.name,
       old: user.old,
       number: user.number,
+      location: user.location,
       first_name: user.first_name ? user.first_name : "",
       last_name: user.last_name ? user.last_name : "",
       username: user.username ? user.username : "",
       course: user.course,
+      time: time,
     }).then(() => {
       ctx.answerCbQuery();
       ctx.reply(
@@ -119,14 +150,18 @@ confirm.action("cancel", async (ctx) => {
   }
 });
 
+function cancel(ctx) {
+  ctx.reply("Bekor qilindi", my_const.courses);
+  return ctx.scene.leave();
+}
+
 const menuScene = new Scenes.WizardScene(
   "register",
   getName,
   getOld,
   getNumber,
+  getLocation,
   finished,
   confirm
 );
-// menuScene.command("cancel", leave());
-
 module.exports = menuScene;
